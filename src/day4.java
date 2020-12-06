@@ -1,138 +1,174 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class day4 {
-	public static void main(String[] args) throws Exception {
+
+	//This was done QUITE poorly but oh well 
+	public static void main(String[] args) throws Exception{
 		
-		File file = new File("D:\\Documents\\AdventOfCode2020Input\\input4.txt");
+		HashSet<String> requiredSet = new HashSet<String>();
+		requiredSet.add("byr");
+		requiredSet.add("iyr");
+		requiredSet.add("eyr");
+		requiredSet.add("hgt");
+		requiredSet.add("hcl");
+		requiredSet.add("ecl");
+		requiredSet.add("pid");
+		// not required requiredSet.add("cid");
+		
+		File file = new File("C:\\Users\\itk78\\Documents\\AdventOfCode\\inputs\\input4.txt");
 		BufferedReader br = new BufferedReader(new FileReader(file));
-		ArrayList<String> passes = new ArrayList<String>();
-		HashMap<Integer, HashSet<Integer>> foundRows = new HashMap<Integer, HashSet<Integer>>();
-		String line;
-		while((line = br.readLine()) != null) {
-			passes.add(line);
-		}
-		int maxId = 0;
 		
-		List<Object> results;
-		for(String str : passes) {
-			results = helper1(str, foundRows);
-			int x = (Integer) results.get(0);
-			foundRows = (HashMap<Integer, HashSet<Integer>>) results.get(1);
-			System.out.println("X: " + x);
-			if(x > maxId) {
-				maxId = x;
-				System.out.println("max id: " + maxId);
+		HashMap<String, String> passport = new HashMap<String, String>();
+		int numValid = 0;
+		int numValid2 = 0;
+		
+		String line;
+		boolean done = false;
+		while((line = br.readLine()) != null) {
+			System.out.println("Line: " + line);
+			if(line.trim().isEmpty()) {
+				//reached the end of a passport, check if it was valid
+				boolean hasAllKeys = true;
+				for(String inSet : requiredSet) {
+					if(!passport.containsKey(inSet)) {
+						hasAllKeys = false;
+					}
+				}
+				if(hasAllKeys) {
+					numValid++;
+					//do more validation here for part2
+					if(verifyPassportValues(passport)) {
+						numValid2++;
+					}
+						
+				}
+				passport.clear(); //new passport started
+			}
+			else {
+				//split the line by " ", then split each entry by ":" to get the keys
+				String[] lineSplitBySpace = line.split(" ");
+				for(String keyValuePair : lineSplitBySpace) {
+					String key = keyValuePair.split(":")[0];
+					String value = keyValuePair.split(":")[1];
+					passport.put(key, value);
+				}
 			}
 			
 		}
-		int ourCol = 0;
-		int ourRow = 0;
-		for(Map.Entry<Integer, HashSet<Integer>> entry : foundRows.entrySet()) {
-			System.out.println("KEY: " + entry.getKey());
-			System.out.println("VALUE: " + entry.getValue());
-			int prev = -1;
-			for(Integer i : entry.getValue()) {
-				if(prev == -1) {
-					prev = i;
-				}
-				else {
-					if(i - prev != 1) {
-						//our seat is between these two
-						ourCol = i -1;
-						ourRow = entry.getKey();
-						System.out.println("Our col/row: " + ourRow + " " + ourCol);
-						break;
-					}
-					else {
-						prev = i;
-					}
+		//need to process the very last passport potentially
+		if(!passport.isEmpty()) {
+			boolean hasAllKeys = true;
+			for(String inSet : requiredSet) {
+				if(!passport.containsKey(inSet)) {
+					hasAllKeys = false;
 				}
 				
 			}
+			if(hasAllKeys) {
+				numValid++;
+				if(verifyPassportValues(passport)) {
+					numValid2++;
+				}
+			}
+			passport.clear(); //new passport started
 		}
 		
-		int ourSeatId = (ourRow * 8) + ourCol;
-		System.out.println("max id: " + maxId);
-		System.out.println("our seat ID: " + ourSeatId);
+		System.out.println("NumValid: " + numValid);
+		System.out.println("NumValid2: " + numValid2);
+		
 	}
 	
-	public static List<Object> helper1(String s, HashMap<Integer, HashSet<Integer>> map) {
-		List<Object> results = new ArrayList<Object>(); //just doing this for part two, its not very cool but eh
-		int firstResult = 0;
-		char F = 'F';
-		char B = 'B';
-		char L = 'L';
-		char R = 'R';
-		int rowHigh = 127;
-		int rowLow = 0;
-		int rowMidPoint = (rowHigh + rowLow) / 2;
-		int rowMidPoint2 = rowMidPoint + 1;
-		int finalRow = 0;
-		
-		int colHigh = 7;
-		int colLow = 0;
-		int colMid = (colHigh + colLow) / 2; //will floor down to lower number
-		int colMid2 = colMid + 1;
-		int finalCol = 0;
-		
-		System.out.println(s);
-		String rowMoves = s.substring(0, 7);
-		String colMoves = s.substring(7, s.length());
-		
-		for(char c : rowMoves.toCharArray()) {
-			if(c == F) {
-				//drop top (higher) half
-				rowHigh = rowMidPoint;
-				rowMidPoint = (rowHigh+rowLow) / 2;
-				rowMidPoint2 = rowMidPoint + 1;
+	//this is kinda ugly
+	public static boolean verifyPassportValues(HashMap<String, String> passport) {
+		boolean isValidValues = true;
+		for(Map.Entry<String, String> entry : passport.entrySet()) {
+			String regex = null;
+			switch(entry.getKey()) {
+				case "byr": 
+					regex = "[0-9]{4}";
+					if(entry.getValue().matches(regex)) {
+						if(Integer.parseInt(entry.getValue()) < 1920 || Integer.parseInt(entry.getValue()) > 2002) {
+							isValidValues = false;
+						}
+					}
+					else {
+						isValidValues = false;
+					}
+					
+					break;
+				case "iyr":
+					regex = "[0-9]{4}";
+					if(entry.getValue().matches(regex)) {
+						if(Integer.parseInt(entry.getValue()) < 2010 || Integer.parseInt(entry.getValue()) > 2020) {
+							isValidValues = false;
+						}
+					}
+					else {
+						isValidValues = false;
+					}
+					break;
+				case "eyr":
+					regex = "[0-9]{4}";
+					if(entry.getValue().matches(regex)) {
+						if(Integer.parseInt(entry.getValue()) < 2020 || Integer.parseInt(entry.getValue()) > 2030) {
+							isValidValues = false;
+						}
+					}
+					else {
+						isValidValues = false;
+					}
+					break;
+				case "hgt":
+					regex = "[0-9]+((cm)|(in))";
+					if(entry.getValue().matches(regex)) {
+						String cmOrIn = entry.getValue().substring(entry.getValue().length()-2, entry.getValue().length());
+						if(cmOrIn.equals("cm")) {
+							String numbers = entry.getValue().split("cm")[0];
+							if(Integer.parseInt(numbers) < 150 || Integer.parseInt(numbers) > 193) {
+								isValidValues = false;
+							}
+						}
+						else {
+							String numbers = entry.getValue().split("in")[0];
+							if(Integer.parseInt(numbers) < 59 || Integer.parseInt(numbers) > 76) {
+								isValidValues = false;
+							}
+						}
+					}
+					else {
+						isValidValues = false;
+					}
+					break;
+				case "hcl":
+					regex = "#[0-9a-f]{6}";
+					if(!entry.getValue().matches(regex)){
+						isValidValues = false;
+					}
+					break;
+				case "ecl":
+					HashSet<String> set = new HashSet<String>(Arrays.asList("amb", "blu", "brn", "gry", "grn", "hzl", "oth"));
+					if(!set.contains(entry.getValue())) {
+						isValidValues = false;
+					}
+					break;
+				case "pid":
+					regex = "^[0-9]{9}$";
+					if(!entry.getValue().matches(regex)) {
+						isValidValues = false; 
+					}
+					break;
 			}
-			else if(c == B) {
-				rowLow = rowMidPoint2;
-				rowMidPoint = (rowHigh+rowLow) / 2;
-				rowMidPoint2 = rowMidPoint + 1;
-			}
-			
-			
 		}
 		
-		finalRow = rowLow; //should be the same at this point
-		
-		for(char c : colMoves.toCharArray()) {
-			if(c == L) {
-				colHigh = colMid;
-				colMid = (colHigh+colLow) / 2;
-				colMid2 = colMid + 1;
-			}
-			else if(c == R) {
-				colLow = colMid2;
-				colMid = (colHigh+colLow) / 2;
-				colMid2 = colMid + 1;
-			}
-		}
-		finalCol = colLow;
-		firstResult = finalRow * 8 + finalCol;
-		
-		//part two stuff. add the row/col to the map
-		if(map.containsKey(finalRow)) {
-			map.get(finalRow).add(finalCol);
-		}
-		else {
-			HashSet<Integer> set = new HashSet<Integer>();
-			set.add(finalCol);
-			map.put(finalRow, set);
-		}
-		
-		results.add(firstResult);
-		results.add(map);
-		return results;
-	}
-	
-	
+		return isValidValues;
+}
+
 }
