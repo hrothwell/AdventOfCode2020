@@ -130,4 +130,5 @@ public class day6 {
 		
 		return result;
 	}
+	
 }
