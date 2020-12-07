@@ -9,7 +9,7 @@ import java.util.List;
 public class day7 {
 	public static void main(String[] args) throws Exception {
 	
-		File file = new File("C:\\Users\\itk78\\Documents\\AdventOfCode\\inputs");
+		File file = new File("D:\\Documents\\AdventOfCode2020Input\\input7.txt");
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		
 		ArrayList<String> inputLines = new ArrayList<String>();
@@ -50,15 +50,20 @@ public class day7 {
 			temp = s.split("contain"); //split to get the key bag and its values first
 			keyBag = temp[0].split("bags")[0].trim(); //should keep just the "color" string
 			System.out.println("Key bag: " + keyBag);
+			System.out.println("temp value: " + temp[1]);
 			//contains no other bags
-			if(temp[1].startsWith("no")) {
+			if(temp[1].contains("no")) {
+				System.out.println("no other bags");
 				bagRules.put(keyBag, null); //using null for a bag that contains no other bags
 			}
 			else {
-				String nonKeyBagsNoPunctuation = temp[1].replaceAll("[^a-zA-Z0-9]", "");
+				String nonKeyBagsNoPunctuation = temp[1].replaceAll("[^a-zA-Z0-9 ]", "");
 				String[] valueBags = nonKeyBagsNoPunctuation.split("((bags)|(bag))"); //split on bags or bag? will it split on all of them then?
+				HashMap<String, Integer> value = new HashMap<String, Integer>();
 				for(String bag : valueBags) {
+					bag = bag.trim();
 					System.out.println("Value bag: " + bag); //want to see what this looks like
+				
 				}
 			}
 		}
