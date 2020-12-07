@@ -63,7 +63,7 @@ public class day7 {
 				for(String bag : valueBags) {
 					bag = bag.trim();
 					System.out.println("Value bag: " + bag); //want to see what this looks like
-				
+					//one last test to make sure this is working correctly now 
 				}
 			}
 		}
