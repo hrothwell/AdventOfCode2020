@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class day7 {
 	public static void main(String[] args) throws Exception {
@@ -32,19 +35,17 @@ public class day7 {
 	}
 	
 	private static void helper1(List<String> inputLines) {
+
 		//the ruls for the bags. Key is a color, value map: key is color, value is how many of that bag
 		HashMap<String, HashMap<String, Integer>> bagRules = new HashMap<String, HashMap<String, Integer>>();
 		
-		//if a bag is listed as "contains ? shiny gold bags"
-		//if in the bagRules map a key's value contains "shiny gold" it should appear in here
-		HashSet<String> bagsThatDirectlyContainShinyGold = new HashSet<String>();
+		HashSet<String> bagsThatCanContainShinyGold = new HashSet<String>(); //trying something new, make one list at the start
 		
-		//if the bag contains a bag that exists in "bags that directlyContainShinyGold"
-		//issue: how do we handle indirect-indirect? loop through it multiple times? could just loop through it like 100 times lol
-		//OR: keep looping until nothing new was added. That seems like the best idea
-		HashSet<String> bagsThatIndirectlyContainShinyGold = new HashSet<String>();
+		HashSet<String> hasNullValue = new HashSet<String>();
+		
 		String keyBag;
 		String[] temp;
+		//fill our bag rules map and direct shiny set
 		for(String s : inputLines) {
 			System.out.println(s);
 			temp = s.split("contain"); //split to get the key bag and its values first
@@ -55,18 +56,111 @@ public class day7 {
 			if(temp[1].contains("no")) {
 				System.out.println("no other bags");
 				bagRules.put(keyBag, null); //using null for a bag that contains no other bags
+				hasNullValue.add(keyBag);
 			}
 			else {
 				String nonKeyBagsNoPunctuation = temp[1].replaceAll("[^a-zA-Z0-9 ]", "");
-				String[] valueBags = nonKeyBagsNoPunctuation.split("((bags)|(bag))"); //split on bags or bag? will it split on all of them then?
+				String[] valueBags = nonKeyBagsNoPunctuation.split("bags?"); //split on bags or bag (the s is optional thanks to ?)
+				String numeric = "[0-9]+";
+				Pattern pattern = Pattern.compile(numeric);
+				Matcher matcher;
 				HashMap<String, Integer> value = new HashMap<String, Integer>();
 				for(String bag : valueBags) {
 					bag = bag.trim();
 					System.out.println("Value bag: " + bag); //want to see what this looks like
-					//one last test to make sure this is working correctly now 
+					matcher = pattern.matcher(bag);
+					int numBags = -1;//default value 
+					//this should always find something if it goes well, but need to call find() first anyways
+					//gets number of this colored bag
+					if(matcher.find()) {
+						numBags = Integer.parseInt(matcher.group());
+					}
+					
+					//leave just the color
+					String bagColor = bag.replaceAll(numeric, "").trim();
+					
+					if(bagColor.equals("shiny gold")) {
+						bagsThatCanContainShinyGold.add(keyBag);//new test
+					}
+					
+					value.put(bagColor, numBags);
+					
+					System.out.println("bag color: " + bagColor+  " numBags: " + numBags);
+				}
+				bagRules.put(keyBag, value);
+			}
+		}
+		
+		System.out.println(bagRules);
+		System.out.println("Bags that can contain shiny gold after first loop (direct relationship): " + bagsThatCanContainShinyGold);
+		
+		
+		boolean foundNew = true;
+		
+		while(foundNew) {
+			//idea: loop through the set/map until we no longer add anything new to the shiny gold set
+			
+			foundNew = false;
+			//temp set to be used to add new things to shiny gold set
+			HashSet<String> tempSet = new HashSet<String>();
+			
+			//loop through the maps and add to shiny gold set
+			for(String key : bagRules.keySet()) {
+				if(!hasNullValue.contains(key) || bagRules.get(key) != null) {
+					for(String value : bagRules.get(key).keySet()) {
+						if(bagsThatCanContainShinyGold.contains(value)) {
+							tempSet.add(key);
+						}
+				}
+			}
+			
+			//if we added something new, we need to loop again so set foundNew to true
+			for(String s : tempSet) {
+				if(bagsThatCanContainShinyGold.add(s)) {
+					foundNew = true;
 				}
 			}
 		}
+	
+		
+		System.out.println("total bag colors: " + bagRules.size());
+		
+		
+		System.out.println("NumBags that have no other bags: " + hasNullValue.size());
+		
+		
+		System.out.println("New bag count (pls dont be 327): " + bagsThatCanContainShinyGold.size());
+		
+	//	helper2(bagRules);//call part two
+		
+	}
 	}
 
+	private static void helper2( HashMap<String, HashMap<String, Integer>> bagRules) {
+		HashMap<String, Integer> goldBagRules = bagRules.get("shiny gold");
+		System.out.println(goldBagRules);
+		int result = recursion(goldBagRules, bagRules);
+		
+		System.out.println("result : " + result);
+		
+	}
+	//this part was WAY more fun and easy for me :)
+	private static int recursion(HashMap<String, Integer> input, HashMap<String, HashMap<String, Integer>> bagRules) {
+		int totalBags = 0;
+		System.out.println("New recursion instance");
+		System.out.println("input map: " + input);
+		if(input == null) return 0;
+		for(Map.Entry<String, Integer> entry : input.entrySet()) {
+			totalBags += entry.getValue();
+			System.out.println("added " + entry.getValue() + " to total");
+			if(bagRules.get(entry.getKey()) != null) {
+				//has other bags to look into
+				System.out.println("diving into map for this bag: " + entry.getKey());
+				totalBags += recursion(bagRules.get(entry.getKey()), bagRules) * entry.getValue();
+			}
+		}
+		
+		return totalBags;
+	}
 }
+
