@@ -13,7 +13,7 @@ public class day10 {
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		
-		File file = new File("C:\\Users\\itk78\\Documents\\AdventOfCode\\inputs\\input10.txt");
+		File file = new File("D:\\Documents\\AdventOfCode2020Input\\input10.txt");
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		
 		ArrayList<Integer> input = new ArrayList<Integer>();
@@ -34,19 +34,21 @@ public class day10 {
 		input.add(myAdapter); //should be added at the end
 		System.out.println(input.toString());
 		part1(input);
-		List<Integer> nextPossible = new ArrayList<Integer>();
-		Integer start = input.get(0);
-		Integer three = new Integer("3");
-		input.remove(0); //clear first one
-		for(Integer i : input) {
-			if(i - start <= 3) {
-				nextPossible.add(i);
-			}
-		}
+		input.remove(0); //clear first one for part2
+		part2Again(input);
+//		List<Integer> nextPossible = new ArrayList<Integer>();
+//		Integer start = input.get(0);
+//		Integer three = new Integer("3");
+
+//		for(Integer i : input) {
+//			if(i - start <= 3) {
+//				nextPossible.add(i);
+//			}
+//		}
 		
 		//BigInteger result = part2(input, start, nextPossible, myAdapter);
 		//System.out.println("finished part 2 " + result);
-		part2Again(input);
+		
 	}
 	
 	public static void part1(List<Integer> input) {
@@ -70,7 +72,7 @@ public class day10 {
 		System.out.println(differences);
 	}
 	
-	//idea to use recursion to go down each "branch"
+	//this ran for like over an hour and a half so look at this and don't do this
 	public static BigInteger part2(List<Integer> input, Integer start, List<Integer> nextPossible, Integer myAdapter) {
 		BigInteger result = BigInteger.ZERO;
 		Integer three = new Integer("3");
@@ -106,11 +108,16 @@ public class day10 {
 		return result;
 	}
 	
+	//shamelessly stolen, I have somewhat of an idea how/why it works but I want to look deeper into this so I can truly understand
 	public static void part2Again(List<Integer> input) {
-		final long[] sums = new long[input.get(input.size()-1)+1];
+		final long[] sums = new long[input.get(input.size()-1)+1]; //create an array of the size of our adapter + 1
 		
-		sums[0] = 1;
+		sums[0] = 1; //set first sum value to 1 (for the outlet?)
+		
+		//loops through all input
 		for(int i = 0; i < input.size(); i++) {
+			//if the value at this index is greater than 3, then set x equal to the the sum found at index (input at i - 3)
+			//for example: input.get(i) = 6, so x becomes the value of sums[3] 
 			final long x = input.get(i) >= 3 ? sums[input.get(i) - 3] : 0;
 			final long y = input.get(i) >= 2 ? sums[input.get(i) - 2] : 0;
 			final long z = input.get(i) >= 1 ? sums[input.get(i) - 1] : 0;
