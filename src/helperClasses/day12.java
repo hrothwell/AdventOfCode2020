@@ -86,29 +86,28 @@ public class day12 {
 	
 	//not working yet
 	public static void part2(List<String> input) {
-		int shipCurrentDirection = 1; //index in our direction list
-		int wayPointDirection = 1; //position relative to ship
-		char[] directions = {'N', 'E', 'S', 'W'}; 
+		
 		int shipEastWest = 0; //east is positive, west is negative
 		int shipNorthSouth = 0;//north is positive, south is negative
-		int turns = 0; //gonna be used  to see how many times to turn
 		
-		//these are relative to the ship
+		//these are relative to the ship. The ship can be thought of as the origin (0,0)
 		double wayPointNorthSouth = 1;
 		double wayPointEastWest = 10; 
 		
+		//used for when we calculate the new waypoint coordinates
 		double newWayPointNorthSouth = 0;
 		double newWayPointEastWest = 0;
 		
 		//x' = xcos(theta) - y sin(theta)
 		//y' = ycos(theta) + xsin(theta)
-		//if going Left, use given angle. if going right negate
+		//if going Left, use given angle. if going right, use 360-angle
 		
 		for(String s : input) {
 			char c = s.charAt(0);
 			int num = Integer.parseInt(s.substring(1));
 			
 			switch(c) {
+			//move to the waypoint num times. 
 			case 'F':
 				shipNorthSouth += (wayPointNorthSouth * num);
 				shipEastWest += (wayPointEastWest * num);
