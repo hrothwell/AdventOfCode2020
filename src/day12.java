@@ -1,4 +1,4 @@
-package helperClasses;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,7 +11,7 @@ public class day12 {
 	public static void main(String[] args) throws Exception{
 		// TODO Auto-generated method stub
 
-		File file = new File("D:\\Documents\\AdventOfCode2020Input\\input12.txt");
+		File file = new File("C:\\Users\\itk78\\Documents\\AdventOfCode\\inputs\\input12.txt");
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		ArrayList<String> input = new ArrayList<String>();
 		
@@ -125,16 +125,20 @@ public class day12 {
 				wayPointNorthSouth -= num;
 				break;
 			case 'L':
-				newWayPointNorthSouth = (wayPointNorthSouth * Math.cos(Math.toRadians(num))) + (wayPointEastWest * Math.sin(Math.toRadians(num)));
-				newWayPointEastWest = (wayPointEastWest * Math.cos(Math.toRadians(num))) - (wayPointNorthSouth * Math.sin(Math.toRadians(num)));
+				newWayPointNorthSouth = Math.rint((wayPointNorthSouth * Math.cos(Math.toRadians(num))) + (wayPointEastWest * Math.sin(Math.toRadians(num))));
+				newWayPointEastWest = Math.rint((wayPointEastWest * Math.cos(Math.toRadians(num))) - (wayPointNorthSouth * Math.sin(Math.toRadians(num))));
 				wayPointNorthSouth = newWayPointNorthSouth;
 				wayPointEastWest = newWayPointEastWest;
+				System.out.println("New north/south waypoint: " + newWayPointNorthSouth);
+				System.out.println("New east/west waypoint: " + newWayPointEastWest);
 				break;
 			case 'R':
-				newWayPointNorthSouth = (wayPointNorthSouth * Math.cos(Math.toRadians(360-num))) + (wayPointEastWest * Math.sin(Math.toRadians(360-num)));
-				newWayPointEastWest = (wayPointEastWest * Math.cos(Math.toRadians(360-num))) - (wayPointNorthSouth * Math.sin(Math.toRadians(360-num)));
+				newWayPointNorthSouth = Math.rint((wayPointNorthSouth * Math.cos(Math.toRadians(360-num))) + (wayPointEastWest * Math.sin(Math.toRadians(360-num))));
+				newWayPointEastWest = Math.rint((wayPointEastWest * Math.cos(Math.toRadians(360-num))) - (wayPointNorthSouth * Math.sin(Math.toRadians(360-num))));
 				wayPointNorthSouth = newWayPointNorthSouth;
 				wayPointEastWest = newWayPointEastWest;
+				System.out.println("New north/south waypoint: " + newWayPointNorthSouth);
+				System.out.println("New east/west waypoint: " + newWayPointEastWest);
 				break;
 			default:
 				break;
